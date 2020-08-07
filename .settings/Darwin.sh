@@ -21,7 +21,7 @@ sudo nvram SystemAudioVolume=" "
 echo "Restart automatically if the computer freezes"
 sudo systemsetup -setrestartfreeze on
 
-echo "Remove duplicates in the \“Open With\” menu (also see `lscleanup` alias)"
+# echo "Remove duplicates in the 'Open With' menu (also see 'lscleanup' alias)"
 # /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
 
 
@@ -360,7 +360,7 @@ defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
 ###############################################################################
-echo "Address Book, Dashboard, iCal, TextEdit, and Disk Utility                   #"
+# Address Book, Dashboard, iCal, TextEdit, and Disk Utility
 ###############################################################################
 
 echo "Use plain text mode for new TextEdit documents"
@@ -412,6 +412,18 @@ defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 ###############################################################################
 
 defaults write com.googlecode.iterm2 OnlyWhenMoreTabs -bool false
+
+###############################################################################
+# Remove unwanted apps from the dock and add preferred apps                   #
+###############################################################################
+
+dockutil --remove 'Siri'
+dockutil --remove 'Notes'
+dockutil --remove 'Reminders'
+dockutil --remove 'Contacts'
+
+dockutil --add /Applications/Firefox.app --replacing 'Safari'
+dockutil --add /Applications/Spotify.app
 
 ###############################################################################
 # Kill affected applications                                                  #

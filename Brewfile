@@ -12,6 +12,7 @@ brew 'bash' # Bash 4
 brew 'bat'
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'direnv'
+brew 'dockutil'
 brew 'git'
 brew 'git-extras'
 brew 'git-flow'
