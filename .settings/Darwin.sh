@@ -349,8 +349,8 @@ defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 echo "Show the main window when launching Activity Monitor"
 defaults write com.apple.ActivityMonitor OpenMainWindow -bool true
 
-echo "Visualize CPU usage in the Activity Monitor Dock icon"
-defaults write com.apple.ActivityMonitor IconType -int 5
+echo "Visualize CPU history in the Activity Monitor Dock icon"
+defaults write com.apple.ActivityMonitor IconType -int 6
 
 echo "Show all processes in Activity Monitor"
 defaults write com.apple.ActivityMonitor ShowCategory -int 0
@@ -406,6 +406,12 @@ defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 # echo "Stop iTunes from responding to the keyboard media keys"
 # launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+
+###############################################################################
+# iTerm2                                                                      #
+###############################################################################
+
+defaults write com.googlecode.iterm2 OnlyWhenMoreTabs -bool false
 
 ###############################################################################
 # Kill affected applications                                                  #
