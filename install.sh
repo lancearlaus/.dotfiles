@@ -89,7 +89,7 @@ if [ "$OS_NAME" == "Darwin" ]; then
     # Install bundle packages
     if [[ -f Brewfile ]]; then
         echo "Installing packages from brew bundle..."
-        brew bundle
+        brew bundle || true     # Ignore missing packages
     fi
 
 fi
