@@ -78,7 +78,6 @@ cask 'visual-studio-code'
 # cask 'vlc'
 cask 'webex-meetings'
 cask 'whatsapp'
-cask 'zoom'
 
 # Quicklook
 cask 'qlcolorcode'
