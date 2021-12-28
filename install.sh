@@ -44,6 +44,27 @@ select_dotfiles_branch() {
     select DOTFILES_BRANCH in ${DOTFILES_BRANCHES[@]}; do break; done
 }
 
+# Download SSH key pair from LastPass vault
+# Returns key pair in PUBLIC_KEY and PRIVATE_KEY environment variables
+# Retrieves username from LastPass configuration (~/.lpass/username)
+download_ssh_key_pair() {
+    local key_pair_name="$1"
+
+    unset PUBLIC_KEY PRIVATE_KEY
+
+    command -v lpass &> /dev/null || (( echo "Missing lpass command. Please install LastPass command-line program." && return 1 ))
+
+    if [ -z "${LPASS_USERNAME:=$( cat $HOME/.lpass/username 2>/dev/null ) }" ]; then
+        read -e -p "Please enter LastPass user name (e.g. user@domain.com): " LPASS_USERNAME
+    fi
+    
+    # Ensure active LastPass session
+    lpass status -q || lpass login $LPASS_USERNAME
+
+    # Retrieve key pair
+    PUBLIC_KEY=$( lpass show --field="Public Key"  "${key_pair_name}")
+    PRIVATE_KEY=$(lpass show --field="Private Key" "${key_pair_name}")
+}
 
 # =================================================================
 # Begin configuration
@@ -57,14 +78,9 @@ fi
 
 echo "Installing $DOTFILES_BRANCH_PREFIX branch $DOTFILES_BRANCH"
 
-# Clone as a bare repository
+# Clone single branch as a bare repository
 echo "Cloning repository..."
-git clone --bare $DOTFILES_FETCH_URL $WORK_TREE
-
-# Checkout
-# TODO: Add messaging upon error (existing files)
-echo "Checking out configuration branch $DOTFILES_BRANCH"
-dotfiles checkout $DOTFILES_BRANCH
+git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL $WORK_TREE
 
 # Set push url to use SSH (instead of HTTPS) to allow pushing updates
 dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
@@ -96,39 +112,34 @@ if [ "$OS_NAME" == "Darwin" ]; then
         brew bundle || true     # Ignore missing packages
     fi
 
-    # Download private key material from LastPass vault
+    # Optionally download private key material from LastPass vault
     # Check for SSH public keys and LastPass command-line and configuration
-    if ls ~/.ssh/*.pub 1> /dev/null 2>&1 && command -v lpass &> /dev/null && [ -f ~/.lpass/username ]; then
+    # Convention: Name of key pair in vault is the same as the private key file name
+    if ls ~/.ssh/*.pub 1> /dev/null 2>&1 ]; then
 
-        read -p "SSH public keys found. Download matching private keys from LastPass vault (y/N)?" -n 1 -r
-        echo
+        read -p "SSH public key(s) found. Install matching private keys from vault (y/N)?" -n 1 -r ; echo
+        
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-
-            # Ensure active LastPass session
-            lpass status -q || lpass login $(cat ~/.lpass/username)
-
-            # For each public key, ask to retrieve private key if not found and public key matches
+            # Install matching private key(s) from vault
             for PUBLIC_KEY_FILE in ~/.ssh/*.pub; do
                 PRIVATE_KEY_FILE=${PUBLIC_KEY_FILE%.*}
                 KEY_PAIR_NAME=${PRIVATE_KEY_FILE##*/}
 
-                if [ -f "$PRIVATE_KEY_FILE" ]; then
-                    echo "Private key file found for key pair $KEY_PAIR_NAME, skipping download"
-                else 
-                    echo "Retrieving and comparing public key for key pair ${KEY_PAIR_NAME}..."
-                    PUBLIC_KEY=$(lpass show --field="Public Key" "${KEY_PAIR_NAME}")
+                if [[ -L "$PUBLIC_KEY_FILE" || -L "$PRIVATE_KEY_FILE" ]]; then
+                    echo "Skipping linked key pair $KEY_PAIR_NAME"
+                elif [ -f "$PRIVATE_KEY_FILE" ]; then
+                    echo "Private key file $PRIVATE_KEY_FILE found for key pair $KEY_PAIR_NAME, skipping download"
+                else
+                    download_ssh_key_pair $KEY_PAIR_NAME
 
-                    if echo $PUBLIC_KEY | diff -b "$PUBLIC_KEY_FILE" - ; then
-                        echo "Retrieving private key for key pair $KEY_PAIR_NAME"  
-                        PRIVATE_KEY=$(lpass show --field="Private Key" "${KEY_PAIR_NAME}")
-                        echo "Saving private key for key pair $KEY_PAIR_NAME to $PRIVATE_KEY_FILE"
-                        echo "$PRIVATE_KEY" > "$PRIVATE_KEY_FILE"
-                        chmod 600 "$PRIVATE_KEY_FILE"
-                    else
-                        echo "Error: Public key mismatch for key pair $KEY_PAIR_NAME, skipping key pair"
-                    fi
+                    # Check that public key from vault matches before installing private key
+                    echo $PUBLIC_KEY | diff -b "$PUBLIC_KEY_FILE" - || (( echo "ERROR: Public key material mismatch for key pair $KEY_PAIR_NAME. Local file content does not match LastPass vault content." && return 1 ))
+
+                    echo "Saving private key for key pair $KEY_PAIR_NAME to $PRIVATE_KEY_FILE"
+                    echo "$PRIVATE_KEY" > "$PRIVATE_KEY_FILE"
+                    chmod 600 "$PRIVATE_KEY_FILE"
                 fi
-            done        
+            done
         fi
     fi
 fi
