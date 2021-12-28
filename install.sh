@@ -92,6 +92,41 @@ if [ "$OS_NAME" == "Darwin" ]; then
         brew bundle || true     # Ignore missing packages
     fi
 
+    # Download private key material from LastPass vault
+    # Check for SSH public keys and LastPass command-line and configuration
+    if ls ~/.ssh/*.pub 1> /dev/null 2>&1 && command -v lpass &> /dev/null && [ -f ~/.lpass/username ]; then
+
+        read -p "SSH public keys found. Download matching private keys from LastPass vault (y/N)?" -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+
+            # Ensure active LastPass session
+            lpass status -q || lpass login $(cat ~/.lpass/username)
+
+            # For each public key, ask to retrieve private key if not found and public key matches
+            for PUBLIC_KEY_FILE in ~/.ssh/*.pub; do
+                PRIVATE_KEY_FILE=${PUBLIC_KEY_FILE%.*}
+                KEY_PAIR_NAME=${PRIVATE_KEY_FILE##*/}
+
+                if [ -f "$PRIVATE_KEY_FILE" ]; then
+                    echo "Private key file found for key pair $KEY_PAIR_NAME, skipping download"
+                else 
+                    echo "Retrieving and comparing public key for key pair ${KEY_PAIR_NAME}..."
+                    PUBLIC_KEY=$(lpass show --field="Public Key" "${KEY_PAIR_NAME}")
+
+                    if echo $PUBLIC_KEY | diff -b "$PUBLIC_KEY_FILE" - ; then
+                        echo "Retrieving private key for key pair $KEY_PAIR_NAME"  
+                        PRIVATE_KEY=$(lpass show --field="Private Key" "${KEY_PAIR_NAME}")
+                        echo "Saving private key for key pair $KEY_PAIR_NAME to $PRIVATE_KEY_FILE"
+                        echo "$PRIVATE_KEY" > "$PRIVATE_KEY_FILE"
+                        chmod 600 "$PRIVATE_KEY_FILE"
+                    else
+                        echo "Error: Public key mismatch for key pair $KEY_PAIR_NAME, skipping key pair"
+                    fi
+                fi
+            done        
+        fi
+    fi
 fi
 
 # Apply context specific settings
