@@ -5,14 +5,13 @@
 #
 # Usage: Paste the following into a macOS or Linux terminal
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/install/install.sh)" -- <branch>
-#       where <branch> is optional and specifies the config branch, without the config/ prefix, to install
-#       If branch is not specified, the user is presented with a list of available config branches and prompted to select one to install
+#       where <branch> is optional and specifies the dotfiles branch, without the dotfiles/ prefix, to install
+#       If branch is not specified, the user is presented with a list of available dotfiles branches and prompted to select one to install
 #
 # Configurations:
-#   A configuration is checked out into the current
-#   Configuration branch names follow the convention 'config/<name>'
-#   Configuration is checked out in the home directory and contain user-specific customization files
-#   See a sample configuration branch here: https://github.com/lancearlaus/.dotfiles/tree/config/main
+#   Dotfiles branch names follow the convention 'dotfiles/<name>'
+#   Dotfiles are checked out in the home directory and contain user-specific customization files
+#   See a sample configuration branch here: https://github.com/lancearlaus/.dotfiles/tree/dotfiles/main
 # 
 # Thanks: https://www.atlassian.com/git/tutorials/dotfiles
 #
@@ -23,8 +22,9 @@ set -e
 
 # Dotfiles Github repository configuration (change this to configure for different user)
 GITHUB_USER=lancearlaus
-GITHUB_REPO_NAME=.dotfiles.git
-GITHUB_REPO_URL=https://github.com/$GITHUB_USER/$GITHUB_REPO_NAME
+DOTFILES_REPO_NAME=.dotfiles.git
+DOTFILES_BRANCH_PREFIX=dotfiles
+GITHUB_REPO_URL=https://github.com/$GITHUB_USER/$DOTFILES_REPO_NAME
 
 OS_NAME=`uname -s`
 
@@ -34,13 +34,13 @@ dotfiles() {
 }
 
 # Prompt the user to select a configuration branch
-# CONFIG_BRANCH is set to the selected branch, including config/ prefix
-select_config_branch() {
-    read -ra CONFIG_BRANCHES <<< $(git ls-remote --heads $GITHUB_REPO_URL 'refs/heads/config/*' | cut -f2 | sed -e 's/refs\/heads\///' | sort | tr '\n' ' ')
+# DOTFILES_BRANCH is set to the selected branch, including $DOTFILES_BRANCH_PREFIX/ prefix
+select_dotfiles_branch() {
+    read -ra DOTFILES_BRANCHES <<< $(git ls-remote --heads $GITHUB_REPO_URL "refs/heads/${DOTFILES_BRANCH_PREFIX}/*" | cut -f2 | sed -e 's/refs\/heads\///' | sort | tr '\n' ' ')
     
-    echo "Configuration branches from $GIT_REPO_URL:"
-    PS3="Please select a configuration branch to install from the list above: "
-    select CONFIG_BRANCH in ${CONFIG_BRANCHES[@]}; do break; done
+    echo "Dotfiles branches from $GIT_REPO_URL:"
+    PS3="Please select a ${DOTFILES_BRANCH_PREFIX} branch to install from the list above: "
+    select DOTFILES_BRANCH in ${DOTFILES_BRANCHES[@]}; do break; done
 }
 
 
@@ -49,12 +49,12 @@ select_config_branch() {
 
 # Prompt the user to select a config branch if none specified
 if [ -z "$1" ]; then
-    select_config_branch
+    select_dotfiles_branch
 else
-    CONFIG_BRANCH=$1
+    DOTFILES_BRANCH=$1
 fi
 
-echo "Installing configuration branch $CONFIG_BRANCH"
+echo "Installing $DOTFILES_BRANCH_PREFIX branch $DOTFILES_BRANCH"
 
 # Clone as a bare repository
 echo "Cloning repository..."
@@ -62,8 +62,8 @@ git clone --bare $GITHUB_REPO_URL $WORK_TREE
 
 # Checkout
 # TODO: Add messaging upon error (existing files)
-echo "Checking out configuration branch $CONFIG_BRANCH"
-dotfiles checkout $CONFIG_BRANCH
+echo "Checking out configuration branch $DOTFILES_BRANCH"
+dotfiles checkout $DOTFILES_BRANCH
 
 # Set local option to not show untracked files in status
 dotfiles config --local status.showUntrackedFiles no
