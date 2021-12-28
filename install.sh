@@ -24,7 +24,8 @@ set -e
 GITHUB_USER=lancearlaus
 DOTFILES_REPO_NAME=.dotfiles.git
 DOTFILES_BRANCH_PREFIX=dotfiles
-GITHUB_REPO_URL=https://github.com/$GITHUB_USER/$DOTFILES_REPO_NAME
+DOTFILES_FETCH_URL=https://github.com/$GITHUB_USER/$DOTFILES_REPO_NAME
+DOTFILES_PUSH_URL=git@github.com:$GITHUB_USER/$DOTFILES_REPO_NAME
 
 OS_NAME=`uname -s`
 
@@ -36,7 +37,7 @@ dotfiles() {
 # Prompt the user to select a configuration branch
 # DOTFILES_BRANCH is set to the selected branch, including $DOTFILES_BRANCH_PREFIX/ prefix
 select_dotfiles_branch() {
-    read -ra DOTFILES_BRANCHES <<< $(git ls-remote --heads $GITHUB_REPO_URL "refs/heads/${DOTFILES_BRANCH_PREFIX}/*" | cut -f2 | sed -e 's/refs\/heads\///' | sort | tr '\n' ' ')
+    read -ra DOTFILES_BRANCHES <<< $(git ls-remote --heads $DOTFILES_FETCH_URL "refs/heads/${DOTFILES_BRANCH_PREFIX}/*" | cut -f2 | sed -e 's/refs\/heads\///' | sort | tr '\n' ' ')
     
     echo "Dotfiles branches from $GIT_REPO_URL:"
     PS3="Please select a ${DOTFILES_BRANCH_PREFIX} branch to install from the list above: "
@@ -58,12 +59,15 @@ echo "Installing $DOTFILES_BRANCH_PREFIX branch $DOTFILES_BRANCH"
 
 # Clone as a bare repository
 echo "Cloning repository..."
-git clone --bare $GITHUB_REPO_URL $WORK_TREE
+git clone --bare $DOTFILES_FETCH_URL $WORK_TREE
 
 # Checkout
 # TODO: Add messaging upon error (existing files)
 echo "Checking out configuration branch $DOTFILES_BRANCH"
 dotfiles checkout $DOTFILES_BRANCH
+
+# Set push url to use SSH (instead of HTTPS) to allow pushing updates
+dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
 
 # Set local option to not show untracked files in status
 dotfiles config --local status.showUntrackedFiles no
