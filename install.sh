@@ -4,7 +4,7 @@
 # Purpose: Initialize personalized doftiles configuration from version controlled Git repository
 #
 # Usage: Paste the following into a macOS or Linux terminal
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/install/install.sh)" -- <branch>
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/install.sh)" -- <branch>
 #       where <branch> is optional and specifies the dotfiles branch, without the dotfiles/ prefix, to install
 #       If branch is not specified, the user is presented with a list of available dotfiles branches and prompted to select one to install
 #
