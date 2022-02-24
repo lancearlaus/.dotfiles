@@ -27,8 +27,6 @@ DOTFILES_BRANCH_PREFIX=dotfiles
 DOTFILES_FETCH_URL=https://github.com/$GITHUB_USER/$DOTFILES_REPO_NAME
 DOTFILES_PUSH_URL=git@github.com:$GITHUB_USER/$DOTFILES_REPO_NAME
 
-OS_NAME=`uname -s`
-
 # Note: This function can also be found in the configuration (see functions.zsh)
 dotfiles() {
     git --git-dir=$HOME/.dotfiles.git/ --work-tree=$HOME "$@"
@@ -69,6 +67,13 @@ download_ssh_key_pair() {
 # =================================================================
 # Begin configuration
 
+# Check for XCode command line tools installation on MacOS
+if [[ $OSTYPE == 'darwin'* ]] && ! xcode-select -p &>/dev/null; then
+    echo "No developer tools were found, requesting install. Please choose an option in the dialog and rerun setup after installation."
+    xcode-select --Install
+    exit 1
+fi
+
 # Prompt the user to select a config branch if none specified
 if [ -z "$1" ]; then
     select_dotfiles_branch
@@ -96,7 +101,7 @@ else
     echo "oh-my-zsh already installed."
 fi
 
-if [ "$OS_NAME" == "Darwin" ]; then
+if [[ $OSTYPE == 'darwin'* ]]; then
 
     # Install Homebrew if not present
     if ! command -v brew &> /dev/null; then
