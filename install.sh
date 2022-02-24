@@ -70,7 +70,7 @@ download_ssh_key_pair() {
 # Check for XCode command line tools installation on MacOS
 if [[ $OSTYPE == 'darwin'* ]] && ! xcode-select -p &>/dev/null; then
     echo "No developer tools were found, requesting install. Please choose an option in the dialog and rerun setup after installation."
-    xcode-select --Install
+    xcode-select --install
     exit 1
 fi
 
