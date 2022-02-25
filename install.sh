@@ -93,6 +93,9 @@ dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
 # Set local option to not show untracked files in status
 dotfiles config --local status.showUntrackedFiles no
 
+# Check out dotfiles
+dotfiles checkout
+
 # Install oh-my-zsh
 if [[ ! -d ~/.oh-my-zsh ]]; then
     echo "Installing on-my-zsh..."
