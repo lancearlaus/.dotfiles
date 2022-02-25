@@ -97,7 +97,9 @@ if [ ! -d "$DOTFILES_REPO_NAME" ]; then
 
     # Check out dotfiles
     dotfiles checkout
-    
+
+else
+    echo "dotfiles repository already present at $DOTFILES_REPO_NAME"
 fi
 
 # Install oh-my-zsh
