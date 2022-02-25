@@ -74,27 +74,31 @@ if [[ $OSTYPE == 'darwin'* ]] && ! xcode-select -p &>/dev/null; then
     exit 1
 fi
 
-# Prompt the user to select a config branch if none specified
-if [ -z "$1" ]; then
-    select_dotfiles_branch
-else
-    DOTFILES_BRANCH=$1
+# Prompt the user to select a config branch if none specified and repo directory doesn't exist
+if [ ! -d "$DOTFILES_REPO_NAME" ]; then
+
+    if [ -z "$1" ]; then
+        select_dotfiles_branch
+    else
+        DOTFILES_BRANCH=$1
+    fi
+
+    echo "Installing $DOTFILES_BRANCH_PREFIX branch $DOTFILES_BRANCH"
+
+    # Clone single branch as a bare repository
+    echo "Cloning repository..."
+    [ ! -d "$DOTFILES_REPO_NAME" ] && git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL
+
+    # Set push url to use SSH (instead of HTTPS) to allow pushing updates
+    dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
+
+    # Set local option to not show untracked files in status
+    dotfiles config --local status.showUntrackedFiles no
+
+    # Check out dotfiles
+    dotfiles checkout
+    
 fi
-
-echo "Installing $DOTFILES_BRANCH_PREFIX branch $DOTFILES_BRANCH"
-
-# Clone single branch as a bare repository
-echo "Cloning repository..."
-[ ! -d "$DOTFILES_REPO_NAME" ] && git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL
-
-# Set push url to use SSH (instead of HTTPS) to allow pushing updates
-dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
-
-# Set local option to not show untracked files in status
-dotfiles config --local status.showUntrackedFiles no
-
-# Check out dotfiles
-dotfiles checkout
 
 # Install oh-my-zsh
 if [[ ! -d ~/.oh-my-zsh ]]; then
