@@ -85,7 +85,7 @@ echo "Installing $DOTFILES_BRANCH_PREFIX branch $DOTFILES_BRANCH"
 
 # Clone single branch as a bare repository
 echo "Cloning repository..."
-git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL $WORK_TREE
+[ ! -d "$DOTFILES_REPO_NAME" ] && git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL
 
 # Set push url to use SSH (instead of HTTPS) to allow pushing updates
 dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
