@@ -37,3 +37,19 @@ Paste the following into a macOS or Linux terminal
 
 * `dotfiles/main` - Standard baseline configuration
 
+## Useful dotfiles commands
+
+Dotfiles are checked out into a bare repository and, since bare repositories lack a working copy, require non-intuitive git commands to manage updates (commit/push/pull)
+
+1. Committing and pushing updated dotfiles works as expected
+  * `dotfiles status`
+  * `dotfiles add <file(s)>`
+  * `dotfiles commit -m "<commit message>"`
+  * `dotfiles push`
+2. Fetching updated dotfiles is different
+  * DO NOT PULL - FETCH ONLY! (pull is the combination of fetch and merge and requires a working copy which doesn't exist for a bare repository)
+  * `dotfiles fetch origin <branch>:<branch>`
+    * Ex: `dotfiles fetch origin dotfiles/main:dotfiles/main`
+3. Checking out updated files (synchronzing changes to another machine) is different
+  * `dotfiles checkout <branch> -- <file...>`
+    * Ex: `dotfiles checkout dotfiles/main -- .zshrc`
