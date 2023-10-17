@@ -163,13 +163,14 @@
 [init]
     templatedir = ~/.dotfiles/.git_template
 
+[core]
+	editor = code --wait
+	
 [diff]
-	#tool = diffmerge
-	tool = sublimerge
+	tool = vscode
 
 [merge]
-	#tool = diffmerge
-	tool = sublimerge
+	tool = vscode
 	# Always show a diffstat at the end of a merge
 	stat = true
 
@@ -177,25 +178,10 @@
 	prompt = false
 	keepBackup = false
 
-[difftool "sublimerge"]
-	prompt = false
-	cmd = subl -n --wait \"$REMOTE\" \"$LOCAL\" --command \"sublimerge_diff_views {\\\"left_read_only\\\": true, \\\"right_read_only\\\": true}\"
-[mergetool "sublimerge"]
-	cmd = subl -n --wait \"$REMOTE\" \"$BASE\" \"$LOCAL\" \"$MERGED\" --command \"sublimerge_diff_views\"
-	trustExitCode = false
-
-[difftool "diffmerge"]
-	cmd = diffmerge \"$LOCAL\" \"$REMOTE\"
-[mergetool "diffmerge"]
-	cmd = "diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$(if test -f \"$BASE\"; then echo \"$BASE\"; else echo \"$LOCAL\"; fi)\" \"$REMOTE\""
-	trustExitCode = true
-
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /opt/homebrew-cask/Caskroom/sourcetree/2.0.4/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+[difftool "vscode"]
+	cmd = code --wait --diff $LOCAL $REMOTE
+[mergetool "vscode"]
+	cmd = code --wait $MERGED
 
 [branch]
     # Automatically set up pull to be --rebase
