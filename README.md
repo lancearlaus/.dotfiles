@@ -6,40 +6,29 @@ Thanks: https://www.atlassian.com/git/tutorials/dotfiles
 
 ## Installation
 
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/install.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/.dotfiles/install.sh)"
 
 Paste the following into a macOS or Linux terminal
 
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/install.sh)" -- <branch>
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/.dotfiles/install.sh)" -- --branch <branch>
 
-    where `<branch>` is optional and specifies the config branch, without the dotfiles/ prefix, to install
-    If branch is not specified, the user is presented with a list of available config branches and prompted to select one to install
+    where `--branch <branch>` is optional and specifies the branch to install, defaulting to master
 
     Example:
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/install.sh)" -- dotfiles/main
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/lancearlaus/.dotfiles/master/install.sh)" -- client
 
 ## Implementation Notes
 
 * Installation script installs
-  * oh-my-zsh with customizations located in ~/.zsh 
-  * Hombrew and applies Brewfile bundle, if present, on OSX systems
-  * Optionally downloads private keys from LastPass vault
-  * Executes OS-specific settings script, if present, located in .settings directoy
+  * Hombrew and applies Brewfile bundle, if present, on Mac
+  * Executes MacOS-specific settings script, if present, on Mac
 * Installation does require sudo rights
 
-## Configurations
-
-* Configuration branch names follow the convention 'dotfiles/<name>'
-* Configuration is checked out in the home directory and contain user-specific customization files
-* See a sample configuration branch here: https://github.com/lancearlaus/.dotfiles/tree/dotfiles/main
-
-### My configurations
-
-* `dotfiles/main` - Standard baseline configuration
 
 ## Useful dotfiles commands
 
-Dotfiles are checked out into a bare repository and, since bare repositories lack a working copy, require non-intuitive git commands to manage updates (commit/push/pull)
+A `dotfiles` function is defined to help manage dotfiles updates. 
+Dotfiles are checked out into a bare repository which, lacking a working copy, requires non-intuitive git commands to commit/push/pull.
 
 1. Committing and pushing updated dotfiles works as expected
   * `dotfiles status`
@@ -52,4 +41,4 @@ Dotfiles are checked out into a bare repository and, since bare repositories lac
     * Ex: `dotfiles fetch origin dotfiles/main:dotfiles/main`
 3. Checking out updated files (synchronzing changes to another machine) is different
   * `dotfiles checkout <branch> -- <file...>`
-    * Ex: `dotfiles checkout dotfiles/main -- .zshrc`
+    * Ex: `dotfiles checkout master -- .zshrc`

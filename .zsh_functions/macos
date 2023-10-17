@@ -1,0 +1,4 @@
+# Detect MacOS
+macos() {
+    [[ "$OSTYPE" == darwin* ]] && return 0 || return 1
+}
