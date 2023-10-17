@@ -31,6 +31,7 @@ DOTFILES_PUSH_URL=git@github.com:$DOTFILES_GITHUB_REPO
 DOTFILES_BRANCH=master
 
 # Parse command-line options
+# Thanks: https://stackoverflow.com/a/14203146
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -39,6 +40,10 @@ while [[ $# -gt 0 ]]; do
       DOTFILES_BRANCH="$2"
       shift # past argument
       shift # past value
+      ;;
+    -f|--force)
+      FORCE=true
+      shift # past argument
       ;;
     -*|--*)
       echo "Unknown option $1"
@@ -133,7 +138,7 @@ install_dotfiles() {
     echo "Installing dotfiles from $DOTFILES_BRANCH..."
 
     # Clone single branch as a bare repository
-    [ ! -d "$HOME/$DOTFILES_REPO_NAME" ] && git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL
+    [ ! -d "$HOME/$DOTFILES_REPO_NAME" ] && git clone --bare --single-branch --branch $DOTFILES_BRANCH $DOTFILES_FETCH_URL "$HOME/$DOTFILES_REPO_NAME"
 
     # Set push url to use SSH (instead of HTTPS) to allow pushing updates
     dotfiles remote set-url --push origin $DOTFILES_PUSH_URL
@@ -142,7 +147,7 @@ install_dotfiles() {
     dotfiles config --local status.showUntrackedFiles no
 
     # Check out dotfiles
-    dotfiles checkout
+    dotfiles checkout ${FORCE:+--force}
 
 }
 
