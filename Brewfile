@@ -30,6 +30,7 @@ brew 'git'
 brew 'git-extras'
 brew 'git-flow'
 cask 'intellij-idea-ce'
+brew 'localstack'
 # brew 'maven'
 # Note: temurin is the successor to adoptopenjdk
 cask 'temurin'
